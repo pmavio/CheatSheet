@@ -13,12 +13,8 @@ public class MainActivity extends BaseActivity implements CheatCodes{
 
     public static final int REQUEST_UPDATE_ON_RETURN = 55555;
 
-    //HardQuestion注解是用来配合sheet.getWith(AnswerSheet)来使用的，但该方法存在问题，所以Demo中注释掉了该方法，使用其它方法来获得传递对象
-    @CheatSheet.HardQuestion(code = CODE_POST_NORMAL)
     int valueInt;
-    @CheatSheet.HardQuestion(code = CODE_POST_NORMAL)
     double valueDouble;
-    @CheatSheet.HardQuestion(code = CODE_POST_NORMAL)
     String valueStr = "";
 
     EditText et_int;

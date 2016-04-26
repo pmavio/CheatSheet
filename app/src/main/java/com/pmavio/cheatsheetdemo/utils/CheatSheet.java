@@ -88,7 +88,7 @@ public abstract class CheatSheet extends HashMap<Object, Object>{
 
     /**
      * 返回当前默认题号
-     * @return
+     * @return 当前默认题号
      */
     public int getCurrentQuestionNo(){
         return currentQuestionNo;
@@ -97,7 +97,7 @@ public abstract class CheatSheet extends HashMap<Object, Object>{
     /**
      * 暗号检测
      * @param code
-     * @return
+     * @return 暗号是否对上
      */
     public boolean checkCode(String code){
         return this.code.equals(code);
@@ -105,21 +105,11 @@ public abstract class CheatSheet extends HashMap<Object, Object>{
 
     /**
      * 检测发送者
-     * @param sender
-     * @return
+     * @param sender 需要判断的发送者
+     * @return 目标是否为当前sheet的发送者
      */
     public boolean checkSender(Object sender){
         return this.sender.equals(sender);
-    }
-
-    /**
-     * 按题号顺序写下一个答案
-     * @param answer
-     * @return 当前写入的答案
-     */
-    public Object put(@NonNull Object answer){
-        currentQuestionNo++;
-        return put(currentQuestionNo, answer);
     }
 
     /**
@@ -153,14 +143,13 @@ public abstract class CheatSheet extends HashMap<Object, Object>{
 
     /**
      * 直接把答案抄到答题卡上
-     * @deprecated 此方法有问题需要解决。<br />
-     * 问题产生原因：{@link Class#getDeclaredFields()}方法返回的Field数组不一定是该类中Field定义的顺序，然后赋值错位导致类型不匹配异常
      * @param sheet 答题卡
      */
     public void getWith(AnswerSheet sheet){
         if(sheet == null) return; //根本没有答题卡
         Field[] questions = sheet.getClass().getDeclaredFields();
         if(questions == null || questions.length <= 0) return;
+
         for(Field question : questions){
             question.setAccessible(true);
             HardQuestion q = question.getAnnotation(HardQuestion.class);
@@ -178,19 +167,11 @@ public abstract class CheatSheet extends HashMap<Object, Object>{
                 if(!isForMe) continue;//没有一个暗号能对上，不是给你的小抄
             }
 
-            Object answer = null;
-            if(!q.question().equals("")) {
-                answer = get(q.question());
-            }else if(q.questionNo() >= 0){
-                answer = get(q.questionNo());
-            }else{
-                answer = get(currentWriteNo);
-                currentWriteNo ++;
-            }
+            Object answer = get(q.questionNo());
             try {
                 question.set(sheet, answer); // 抄答案...
             } catch (Exception e) {
-                Log.e(TAG, "答案(" + answer + ")似乎和题目(" + question.getName() + ")不匹配");
+                Log.e(TAG, "答案(" + answer + ")似乎和题目(" + q.questionNo() + "." + question.getName() + ")不匹配");
             }
         }
     }
@@ -208,30 +189,23 @@ public abstract class CheatSheet extends HashMap<Object, Object>{
      * 答题卡
      * 实现了答题卡的类可以直接调用{@link CheatSheet#getWith(AnswerSheet)}来填满标记了@{@link CheatSheet.HardQuestion}答案
      */
-    public static interface AnswerSheet {}
+    public interface AnswerSheet {}
 
     /**
-     * 难题标记，用于标记在答题卡中不会做的题的题号上，就可以在拿到小抄之后直接抄到答题卡上
+     * 难题标记，用于标记在答题卡中不会做的题的题号上，就可以在拿到小抄之后直接抄到答题卡上{@link CheatSheet#getWith(AnswerSheet)}
      */
     @Target(ElementType.FIELD)
     @Retention(RetentionPolicy.RUNTIME)
-    public static @interface HardQuestion {
-
+    public @interface HardQuestion {
         /**
-         * 题号，在小抄中优先找对应的题号
-         * @return
+         * 题号，从0开始计数
+         * @return 题号
          */
-        String question() default "";
-
-        /**
-         * 默认题号，没有写题号时按默认题号取，默认题号从0开始
-         * @return
-         */
-        int questionNo() default -1;
+        int questionNo();
 
         /**
          * 暗号，可以设置多个暗号，方便四面八方的兄弟一起支援
-         * @return
+         * @return 暗号
          */
         String[] code();
     }

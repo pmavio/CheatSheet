@@ -10,9 +10,6 @@ import com.pmavio.cheatsheetdemo.utils.CheatSheet;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-/**
- * Created by Mavio on 2016/4/14.
- */
 public class BaseActivity extends AppCompatActivity{
 
     protected EventBus eventBus;
@@ -40,16 +37,14 @@ public class BaseActivity extends AppCompatActivity{
 
     @Subscribe
     public void onGetSheet(CheatSheet sheet){
-//        sheet.getWith(this); 此方法有问题，需要改进
-        if(sheet.checkSender(sheet)){
+        if(sheet.checkSender(this)){
             return;
         }
     }
 
     @Subscribe(sticky = true)
     public void onGetSheetSticky(CheatSheet sheet){
-//        sheet.getWith(this); 此方法有问题，需要改进
-        if(sheet.checkSender(sheet)){
+        if(sheet.checkSender(this)){
             return;
         }
     }
